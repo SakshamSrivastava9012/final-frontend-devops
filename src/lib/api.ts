@@ -4,7 +4,7 @@ import axios, { AxiosError } from "axios"
 
 export const apiClient = axios.create({
   baseURL: "https://api.sakshamsrivastava.site",
-  withCredentials: true,
+ timeout: 15000,
 })
 
 /* ================= AUTO JWT ATTACH ================= */
