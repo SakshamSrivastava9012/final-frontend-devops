@@ -1,16 +1,26 @@
 'use client';
 
+import { useState } from "react";
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
-import { Calendar, ArrowRight, ExternalLink } from 'lucide-react';
-import { Event } from '@/lib/api';
+import { Calendar, ArrowRight, ExternalLink, X } from 'lucide-react';
+import { Event, api } from '@/lib/api';
 import AnimatedButton from './AnimatedButton';
 
 interface EventCardProps {
   event: Event;
-  onClick: () => void;
 }
 
-export default function EventCard({ event, onClick }: EventCardProps) {
+export default function EventCard({ event }: EventCardProps) {
+
+  const [open,setOpen] = useState(false)
+
+  const [fullName,setFullName] = useState("")
+  const [gender,setGender] = useState("")
+  const [teamName,setTeamName] = useState("")
+  const [category,setCategory] = useState("")
+  const [googleDriveLink,setDrive] = useState("")
+  const [loading,setLoading] = useState(false)
+
   const x = useMotionValue(0);
   const y = useMotionValue(0);
 
@@ -22,14 +32,8 @@ export default function EventCard({ event, onClick }: EventCardProps) {
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
-    const width = rect.width;
-    const height = rect.height;
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
-    const xPct = mouseX / width - 0.5;
-    const yPct = mouseY / height - 0.5;
-    x.set(xPct);
-    y.set(yPct);
+    x.set((e.clientX - rect.left) / rect.width - 0.5);
+    y.set((e.clientY - rect.top) / rect.height - 0.5);
   };
 
   const handleMouseLeave = () => {
@@ -37,7 +41,47 @@ export default function EventCard({ event, onClick }: EventCardProps) {
     y.set(0);
   };
 
+  const submit = async () => {
+
+  const jwt = localStorage.getItem("jwt")
+
+  if(!jwt){
+    alert("Please login first")
+    return
+  }
+
+  if(!fullName || !teamName || !category || !googleDriveLink){
+    alert("Fill all fields")
+    return
+  }
+
+  setLoading(true)
+
+  try{
+    await api.registerForEvent(event.id,{
+      fullName,
+      gender,
+      teamName,
+      category,
+      googleDriveLink,
+      profileImage:""
+    })
+
+    alert("Registered successfully")
+    setOpen(false)
+
+  }catch(e){
+    alert("Registration failed")
+
+  }finally{
+    setLoading(false)
+  }
+}
+
+
   return (
+    <>
+    {/* CARD */}
     <motion.div
       style={{ rotateX, rotateY, transformStyle: 'preserve-3d' }}
       onMouseMove={handleMouseMove}
@@ -46,52 +90,76 @@ export default function EventCard({ event, onClick }: EventCardProps) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       className="group relative h-[450px] w-full rounded-2xl glass-dark border border-white/10 overflow-hidden cursor-pointer"
-      onClick={onClick}
+      onClick={()=>setOpen(true)}
     >
-      {/* Background Glow */}
+
       <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-secondary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-      
-      {/* Image Section */}
-      <div className="h-1/2 w-full overflow-hidden relative">
+
+      <div className="relative h-1/2 w-full overflow-hidden bg-black">
+        <img src={event.imageUrl} className="absolute inset-0 w-full h-full object-cover blur-xl scale-110 opacity-40" />
+
         <motion.img
-          src={event.image}
-          alt={event.title}
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+          src={event.imageUrl}
+          className="relative z-10 w-full h-full object-contain transition-transform duration-700 group-hover:scale-105"
         />
-        <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors" />
-        <div className="absolute top-4 left-4 glass px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest text-primary">
-          {event.category}
-        </div>
       </div>
 
-      {/* Content Section */}
-      <div className="p-6 flex flex-col h-1/2 justify-between relative z-10" style={{ transform: 'translateZ(30px)' }}>
+      <div className="p-6 flex flex-col h-1/2 justify-between">
         <div>
-          <div className="flex items-center gap-2 text-muted-foreground text-xs mb-2">
-            <Calendar className="w-3 h-3" />
-            {new Date(event.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <Calendar className="w-3 h-3"/> Coming Soon
           </div>
-          <h3 className="text-xl font-bold text-white mb-2 group-hover:text-primary transition-colors">
-            {event.title}
-          </h3>
-          <p className="text-sm text-muted-foreground line-clamp-2">
-            {event.description}
-          </p>
+
+          <h3 className="text-xl font-bold mt-2">{event.title}</h3>
+          <p className="text-sm opacity-70 line-clamp-2">{event.description}</p>
         </div>
 
-        <div className="flex items-center justify-between">
-          <AnimatedButton variant="ghost" size="sm" className="group/btn">
-            Details
-            <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+        <AnimatedButton size="sm">
+          Register <ArrowRight className="w-4 h-4 ml-1"/>
+        </AnimatedButton>
+      </div>
+    </motion.div>
+
+    {/* MODAL */}
+    {open && (
+      <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+
+        <div className="glass-dark p-8 rounded-xl w-[360px] space-y-4 relative">
+
+          <X className="absolute right-4 top-4 cursor-pointer" onClick={()=>setOpen(false)}/>
+
+          <h2 className="font-bold text-xl">Register</h2>
+
+          <input placeholder="Full Name" className="w-full p-3 rounded bg-black/40"
+            value={fullName} onChange={e=>setFullName(e.target.value)}/>
+
+          <input placeholder="Gender" className="w-full p-3 rounded bg-black/40"
+            value={gender} onChange={e=>setGender(e.target.value)}/>
+
+          <input placeholder="Team Name" className="w-full p-3 rounded bg-black/40"
+            value={teamName} onChange={e=>setTeamName(e.target.value)}/>
+
+          {/* ONLY 3 CATEGORIES */}
+          <select className="w-full p-3 rounded bg-black/40"
+            value={category} onChange={e=>setCategory(e.target.value)}>
+
+            <option value="">Select Category</option>
+            <option value="Brainrot">Brainrot</option>
+            <option value="Branding">Branding</option>
+            <option value="Anime">Anime</option>
+
+          </select>
+
+          <input placeholder="Google Drive Link" className="w-full p-3 rounded bg-black/40"
+            value={googleDriveLink} onChange={e=>setDrive(e.target.value)}/>
+
+          <AnimatedButton className="w-full" disabled={loading} onClick={submit}>
+            {loading ? "Submitting..." : "Submit"}
           </AnimatedButton>
-          <div className="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">
-            <ExternalLink className="w-4 h-4 text-primary" />
-          </div>
+
         </div>
       </div>
-
-      {/* Animated Border */}
-      <div className="absolute inset-0 border-2 border-primary/0 group-hover:border-primary/50 transition-colors rounded-2xl pointer-events-none" />
-    </motion.div>
-  );
+    )}
+    </>
+  )
 }

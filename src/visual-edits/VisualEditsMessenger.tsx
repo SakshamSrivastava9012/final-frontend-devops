@@ -1,7 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
+if (typeof window === "undefined") {
+  (global as any).localStorage = {
+    getItem: () => null,
+    setItem: () => {},
+    removeItem: () => {},
+  };
+}
 
 import { useEffect, useState, useRef } from "react";
+const isBrowser = typeof window !== "undefined";
+
 
 export const CHANNEL = "ORCHIDS_HOVER_v1" as const;
 const VISUAL_EDIT_MODE_KEY = "orchids_visual_edit_mode" as const;
@@ -18,7 +27,8 @@ const postMessageDedup = (data: any) => {
   } catch {
     // if stringify fails, fall through
   }
-  window.parent.postMessage(data, "*");
+ if (isBrowser) window.parent.postMessage(data, "*");
+
 };
 
 export type ParentToChild =
@@ -259,7 +269,8 @@ const getCurrentStyles = (
   justifyContent?: string;
   gap?: string;
 } => {
-  const computed = window.getComputedStyle(element);
+  if (!isBrowser) return {};
+const computed = window.getComputedStyle(element);
 
   // Helper to normalize values and provide defaults
   const normalizeValue = (value: string, property: string): string => {
@@ -413,6 +424,11 @@ export default function HoverReceiver() {
   });
   const [isResizing, setIsResizing] = useState(false);
   const [resizeHandle, setResizeHandle] = useState<string | null>(null);
+
+  const stored = typeof window !== "undefined"
+  ? window.localStorage.getItem(VISUAL_EDIT_MODE_KEY)
+  : null;
+
   const [resizeStart, setResizeStart] = useState<{
     x: number;
     y: number;
@@ -480,7 +496,10 @@ export default function HoverReceiver() {
       setTimeout(() => {
         if (typeof window !== "undefined") {
           // Restore focused element
-          const focusedData = localStorage.getItem(FOCUSED_ELEMENT_KEY);
+         const focusedData = typeof window !== "undefined"
+  ? window.localStorage.getItem(FOCUSED_ELEMENT_KEY)
+  : null;
+
           if (focusedData) {
             try {
               const { id } = JSON.parse(focusedData);
