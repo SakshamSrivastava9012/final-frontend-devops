@@ -1,9 +1,12 @@
+'use client'
+
 import axios, { AxiosError } from "axios"
 
 /* ================= AXIOS INSTANCE ================= */
 
 export const apiClient = axios.create({
-  baseURL: "http://localhost:8080",
+  baseURL: process.env.NEXT_PUBLIC_API_BASE,
+
   withCredentials: true,
 })
 
@@ -203,15 +206,7 @@ export const judgeApi = {
       throw err
     }
   },
-  getWinners: async (eventId:number) => {
-  try {
-    const res = await apiClient.get(`/api/winners/${eventId}`)
-    return res.data
-  } catch(err){
-    handleError(err)
-    throw err
-  }
-},
+ 
 
 
   logout: () => {
@@ -345,23 +340,42 @@ export const api = {
     }
   },
 
-  // ✅ PRIVATE WINNERS (JWT REQUIRED — JUDGE OR USER)
-  getWinners: async (eventId: number) => {
-    try {
-      const jwt =
-        localStorage.getItem("judge_jwt") ||
-        localStorage.getItem("jwt")
+  // // ✅ PRIVATE WINNERS (JWT REQUIRED — JUDGE OR USER)
+  // getWinners: async (eventId: number) => {
+  //   try {
+  //     const jwt =
+  //       localStorage.getItem("judge_jwt") ||
+  //       localStorage.getItem("jwt")
 
-      const res = await apiClient.get(`/api/winners/${eventId}`, {
-        headers: {
-          Authorization: `Bearer ${jwt}`,
-        },
-      })
+  //     const res = await apiClient.get(`/api/winners/${eventId}`, {
+  //       headers: {
+  //         Authorization: `Bearer ${jwt}`,
+  //       },
+  //     })
 
-      return res.data
-    } catch (err) {
-      handleError(err)
-      throw err
-    }
-  },
+  //     return res.data
+  //   } catch (err) {
+  //     handleError(err)
+  //     throw err
+  //   }
+  // },
+  getWinners: async (eventId:number) => {
+  try {
+    const jwt =
+      localStorage.getItem("judge_jwt") ||
+      localStorage.getItem("jwt")
+
+    const res = await apiClient.get(`/api/winners/${eventId}`, {
+      headers: {
+        Authorization: `Bearer ${jwt}`,
+      },
+    })
+
+    return res.data   // category map
+  } catch(err){
+    handleError(err)
+    throw err
+  }
+},
+
 }
