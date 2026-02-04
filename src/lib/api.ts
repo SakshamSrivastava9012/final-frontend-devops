@@ -2,10 +2,9 @@
 
 import axios, { AxiosError } from "axios"
 
-/* ================= AXIOS INSTANCE ================= */
 export const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL,
-  withCredentials: true,
+  baseURL: process.env.NEXT_PUBLIC_API_URL || "https://api.sakshamsrivastava.site",
+  timeout: 15000,
 })
 
 
