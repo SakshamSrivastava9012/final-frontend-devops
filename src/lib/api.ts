@@ -1,12 +1,11 @@
-'use client'
-
 import axios, { AxiosError } from "axios"
 
-export const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "https://api.sakshamsrivastava.site",
-  timeout: 15000,
-})
+/* ================= AXIOS INSTANCE ================= */
 
+export const apiClient = axios.create({
+  baseURL: "https://api.sakshamsrivastava.site",
+  withCredentials: true,
+})
 
 /* ================= AUTO JWT ATTACH ================= */
 apiClient.interceptors.request.use((config) => {
