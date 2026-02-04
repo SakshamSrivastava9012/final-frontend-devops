@@ -3,12 +3,11 @@
 import axios, { AxiosError } from "axios"
 
 /* ================= AXIOS INSTANCE ================= */
-
 export const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_BASE,
-
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
   withCredentials: true,
 })
+
 
 /* ================= AUTO JWT ATTACH ================= */
 apiClient.interceptors.request.use((config) => {
