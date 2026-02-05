@@ -171,10 +171,11 @@ export default function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-16">
             {[
-              { name: 'Ayush Rathore', role: 'President', img: 11 },
-              { name: 'Mehek Advani', role: 'Vice President', img: 12 },
-              { name: 'Aditya Pandey', role: 'Gen sec', img: 13 }
-            ].map((leader, i) => (
+  { name: 'Ayush Rathore', role: 'President', img: '/leaders/presdent.jpg' },
+  { name: 'Mehek Advani', role: 'Vice President', img: '/leaders/vice_pres.jpg' },
+  { name: 'Aditya Pandey', role: 'Gen Sec', img: '/leaders/gensec.webp' }
+]
+.map((leader, i) => (
               <motion.div 
                 key={i}
                 initial={{ opacity: 0, y: 30 }}
@@ -185,7 +186,8 @@ export default function Home() {
                 <div className="relative w-48 h-48 md:w-64 md:h-64 mb-8">
                   <div className="absolute inset-0 rounded-[40px] border border-white/10 group-hover:border-blue-500 transition-colors" />
                   <div className="absolute inset-3 rounded-[32px] overflow-hidden grayscale group-hover:grayscale-0 transition-all duration-700 bg-white/5">
-                    <img src={`https://i.pravatar.cc/400?img=${leader.img}`} className="w-full h-full object-cover" alt={leader.name} />
+                    <img src={leader.img} className="w-full h-full object-cover" alt={leader.name} />
+
                   </div>
                   <div className="absolute -bottom-2 right-4 glass px-3 py-1.5 rounded-xl border border-white/10 flex items-center gap-2">
                     <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />

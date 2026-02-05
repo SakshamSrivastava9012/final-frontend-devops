@@ -20,29 +20,35 @@ export default function JudgeDashboard() {
   return (
     <JudgeGuard>
 
-      <EventSelector onSelect={async(id)=>{
-        setEventId(id)
+      <div className="p-12 max-w-7xl mx-auto space-y-10">
 
-        const data = await judgeApi.getRegistrations(id)
-        setRegs(data)
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-black">Judge Control Panel</h1>
 
-        await loadWinners(id)   // load winners initially
-      }}/>
+          <EventSelector onSelect={async(id)=>{
+            setEventId(id)
+            const data = await judgeApi.getRegistrations(id)
+            setRegs(data)
+            await loadWinners(id)
+          }}/>
+        </div>
 
-      {regs.map(r=>(
-        <ParticipantCard
-          key={r.id}
-          p={r}
-          onScore={async(s)=>{
-            await judgeApi.score(r.id,s)
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {regs.map(r=>(
+            <ParticipantCard
+              key={r.id}
+              p={r}
+              onScore={async(s)=>{
+                await judgeApi.score(r.id,s)
+                if(eventId) await loadWinners(eventId)
+              }}
+            />
+          ))}
+        </div>
 
-            // 🔥 refresh winners immediately
-            if(eventId) await loadWinners(eventId)
-          }}
-        />
-      ))}
+        <WinnerPanel winners={winners}/>
 
-      <WinnerPanel winners={winners}/>
+      </div>
 
     </JudgeGuard>
   )

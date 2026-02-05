@@ -11,8 +11,10 @@ export default function EventSelector({onSelect}:{onSelect:(id:number)=>void}) {
   },[])
 
   return (
-    <select className="glass-dark p-3 rounded-xl"
-      onChange={e=>onSelect(Number(e.target.value))}>
+    <select
+      className="glass neon px-6 py-3 rounded-xl outline-none text-sm"
+      onChange={e=>onSelect(Number(e.target.value))}
+    >
       <option>Select Event</option>
       {events.map(e=>(
         <option key={e.id} value={e.id}>{e.title}</option>
